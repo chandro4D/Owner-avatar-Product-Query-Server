@@ -3,8 +3,13 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
 const app = express();
-const port = process.env.PORT || 7000;
+const port = process.env.PORT || 5000;
 
+// const corsOptions = {
+//     origin:['http://localhost:5173','http://localhost:9000'],
+//     credentials: true,
+//     optionSuccessStatus:200,
+// }
 // middleWare
 app.use(cors());
 app.use(express.json());
@@ -26,10 +31,19 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
-    // Send a ping to confirm a successful connection
-    // 
+    //  await client.connect();
     
+
+    const queryCollection = client.db('queriesDB').collection('queries');
+    app.post('/query',async(req,res) => {
+        const newQuery = req.body;
+        console.log(newQuery);
+        const result = await queryCollection.insertOne(newQuery);
+        res.send(result);
+    })
+
+    // Send a ping to confirm a successful connection
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
@@ -40,7 +54,7 @@ run().catch(console.dir);
 // -----------------mongo db end---------------------
 
 app.get('/',(req,res) => {
-    res.send('query server is running')
+    res.send('query server is running very first')
 })
 
 app.listen(port,() => {
