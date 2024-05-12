@@ -1,18 +1,19 @@
-const express = require('express');
-const cors = require('cors');
+const express = require('express')
+const cors = require('cors')
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
-const app = express();
-const port = process.env.PORT || 5000;
 
-// const corsOptions = {
-//     origin:['http://localhost:5173','http://localhost:9000'],
-//     credentials: true,
-//     optionSuccessStatus:200,
-// }
+const port = process.env.PORT || 5000;
+const app = express();
+
+const corsOptions = {
+    origin:['http://localhost:5173','http://localhost:9000'],
+    credentials: true,
+    optionSuccessStatus:200,
+}
 // middleWare
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions))
+app.use(express.json())
 
 // ------------mongo db start--------
 
@@ -41,13 +42,25 @@ async function run() {
         const result = await queryCollection.insertOne(newQuery);
         res.send(result);
     })
+    //----------------- get all query added by user----------------
+    app.get('/query',async(req,res) => {
+        const result = await queryCollection.find().toArray()
+        res.send(result)
+    })
+    // -------------get all query added by specific user-------------
+    app.get('/query/:email',async(req,res) => {
+        const email = req.params.email
+        const query = {email:email}
+        const result = await queryCollection.find(query).sort({ date: -1 }).toArray()
+        res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
