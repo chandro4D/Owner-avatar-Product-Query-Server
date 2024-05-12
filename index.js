@@ -44,7 +44,12 @@ async function run() {
     })
     //----------------- get all query added by user----------------
     app.get('/query',async(req,res) => {
-        const result = await queryCollection.find().toArray()
+        const result = await queryCollection.find().sort({ date: -1 }).toArray()
+        res.send(result)
+    })
+    //---------------- only for home page----------------
+    app.get('/queries',async(req,res) => {
+        const result = await queryCollection.find().sort({ date: -1 }).skip(0).limit(6).toArray()
         res.send(result)
     })
     // -------------get all query added by specific user-------------
