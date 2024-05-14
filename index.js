@@ -1,15 +1,15 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 const port = process.env.PORT || 5000;
 const app = express();
 
 const corsOptions = {
-    origin:['http://localhost:5173','http://localhost:9000'],
-    credentials: true,
-    optionSuccessStatus:200,
+  origin: ['http://localhost:5173', ],
+  credentials: true,
+  optionSuccessStatus: 200,
 }
 // middleWare
 app.use(cors(corsOptions))
@@ -33,32 +33,94 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     //  await client.connect();
-    
+
 
     const queryCollection = client.db('queriesDB').collection('queries');
-    app.post('/query',async(req,res) => {
-        const newQuery = req.body;
-        console.log(newQuery);
-        const result = await queryCollection.insertOne(newQuery);
-        res.send(result);
+    
+
+     
+
+    app.post('/query', async (req, res) => {
+      const newQuery = req.body;
+      console.log(newQuery);
+      const result = await queryCollection.insertOne(newQuery);
+      res.send(result);
     })
+   
+
+     
     //----------------- get all query added by user----------------
-    app.get('/query',async(req,res) => {
-        const result = await queryCollection.find().sort({ date: -1 }).toArray()
-        res.send(result)
+    app.get('/query', async (req, res) => {
+      const result = await queryCollection.find().sort({ date: -1 }).toArray()
+      res.send(result)
     })
+
+    
+    
     //---------------- only for home page----------------
-    app.get('/queries',async(req,res) => {
-        const result = await queryCollection.find().sort({ date: -1 }).skip(0).limit(6).toArray()
-        res.send(result)
+    app.get('/queries', async (req, res) => {
+      const result = await queryCollection.find().sort({ date: -1 }).skip(0).limit(6).toArray()
+      res.send(result)
     })
+
+    
+    
     // -------------get all query added by specific user-------------
-    app.get('/query/:email',async(req,res) => {
-        const email = req.params.email
-        const query = {email:email}
-        const result = await queryCollection.find(query).sort({ date: -1 }).toArray()
-        res.send(result)
+    app.get('/query/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { email: email }
+      const result = await queryCollection.find(query).sort({ date: -1 }).toArray()
+      res.send(result)
     })
+
+
+    
+
+
+     
+   
+    // ---------------------Delete One--------------------
+    app.delete('/query/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await queryCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    // ------------get data for update---------------
+    app.get('/query/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const query = { _id: new ObjectId(id) }
+      const result = await queryCollection.findOne(query);
+      res.send(result);
+    })
+
+    
+    // -----------update data----------
+    app.put('/query/:id',async(req,res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const options = { upsert: true};
+      const updatedData = req.body;
+      const data = {
+        $set: {
+          QueryTitle: updatedData.QueryTitle,
+          BoycottingReasonDetails: updatedData.BoycottingReasonDetails,
+          ProductBrand: updatedData.ProductBrand,
+          ProductName: updatedData.ProductName,
+          ImageURL: updatedData.ImageURL
+        }
+      }
+      const result = await queryCollection.updateOne(filter,data,options);
+      res.send(result);
+    })
+    
+
+   
+    
+
 
     // Send a ping to confirm a successful connection
      await client.db("admin").command({ ping: 1 });
@@ -71,10 +133,10 @@ async function run() {
 run().catch(console.dir);
 // -----------------mongo db end---------------------
 
-app.get('/',(req,res) => {
-    res.send('query server is running very first')
+app.get('/', (req, res) => {
+  res.send('query server is running very first')
 })
 
-app.listen(port,() => {
-    console.log(`query server is running on port ${port}`)
+app.listen(port, () => {
+  console.log(`query server is running on port ${port}`)
 })
