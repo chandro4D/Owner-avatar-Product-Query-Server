@@ -7,12 +7,12 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 const corsOptions = {
-  origin: ['http://localhost:5173', ],
+  origin: [`https://product-query-client.web.app`,'http://localhost:5173','https://product-query-client.web.app','https://product-query-client.firebaseapp.com'],
   credentials: true,
   optionSuccessStatus: 200,
 }
 // middleWare
-app.use(cors(corsOptions))
+app.use(cors())
 app.use(express.json())
 
 // ------------mongo db start--------
@@ -37,7 +37,7 @@ async function run() {
 
     const queryCollection = client.db('queriesDB').collection('queries');
     
-
+  
      
 
     app.post('/query', async (req, res) => {
@@ -47,6 +47,7 @@ async function run() {
       res.send(result);
     })
    
+     
 
      
     //----------------- get all query added by user----------------
@@ -87,16 +88,9 @@ async function run() {
       res.send(result);
     })
 
+      
 
-    // ------------get data for update---------------
-    app.get('/query/:id', async (req, res) => {
-      const id = req.params.id;
-      console.log(id)
-      const query = { _id: new ObjectId(id) }
-      const result = await queryCollection.findOne(query);
-      res.send(result);
-    })
-
+   
     
     // -----------update data----------
     app.put('/query/:id',async(req,res) => {
@@ -116,6 +110,16 @@ async function run() {
       const result = await queryCollection.updateOne(filter,data,options);
       res.send(result);
     })
+
+    // ------------get data for update---------------
+  app.get('/query/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(id)
+    const query = { _id: new ObjectId(id) }
+    const result = await queryCollection.findOne(query);
+    res.send(result);
+  })
+  
     
 
    
@@ -123,7 +127,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-     await client.db("admin").command({ ping: 1 });
+    //  await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
