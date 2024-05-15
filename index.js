@@ -50,10 +50,21 @@ async function run() {
      
 
      
-    //----------------- get all query added by user----------------
+    //----------------- get all query added by user(queries)----------------
     app.get('/query', async (req, res) => {
       const result = await queryCollection.find().sort({ date: -1 }).toArray()
       res.send(result)
+    })
+    // -------------get one for details page------------------
+    app.get('/queries/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+
+      const options = {
+        projection: {ProductName: 1,_id: 1},
+      };
+      const result = await queryCollection.findOne(query,options);
+      res.send(result);
     })
 
     
@@ -73,13 +84,7 @@ async function run() {
       const result = await queryCollection.find(query).sort({ date: -1 }).toArray()
       res.send(result)
     })
-
-
-    
-
-
-     
-   
+  
     // ---------------------Delete One--------------------
     app.delete('/query/:id', async (req, res) => {
       const id = req.params.id;
@@ -87,7 +92,7 @@ async function run() {
       const result = await queryCollection.deleteOne(query);
       res.send(result);
     })
-
+    
       
 
    
