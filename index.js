@@ -36,10 +36,37 @@ async function run() {
 
 
     const queryCollection = client.db('queriesDB').collection('queries');
-    
-  
-     
+    const recommendCollection = client.db('recommendDb').collection('recommend');
 
+// --------------post recommend------------------
+app.post('/recommend', async (req, res) => {
+  const recommendationData = req.body;
+  console.log(recommendationData);
+  const result = await recommendCollection.insertOne(recommendationData);
+  res.send(result);
+})
+// ----------Post Data (01)------------
+
+// get all recommend data ----------------------
+app.get('/recommend', async (req, res) => {
+  const result = await recommendCollection.find().sort({ date: -1 }).toArray();
+  res.send(result)
+})
+// ---------------specific user recommendation-------------------
+app.get('/recommend/:userEmail', async (req, res) => {
+  const userEmail = req.params.userEmail
+  const query = { userEmail : userEmail }
+  const result = await recommendCollection.find(query).sort({ date: -1 }).toArray()
+  res.send(result)
+})
+// ----------------delete recommendation----------------------
+app.delete('/recommend/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) }
+  const result = await recommendCollection.deleteOne(query);
+  res.send(result);
+})
+// --------------------------------------------
     app.post('/query', async (req, res) => {
       const newQuery = req.body;
       console.log(newQuery);
@@ -51,34 +78,38 @@ async function run() {
 
      
     //----------------- get all query added by user(queries)----------------
+    // -------------------------------------------
     app.get('/query', async (req, res) => {
-      const result = await queryCollection.find().sort({ date: -1 }).toArray()
+      const result = await queryCollection.find().sort({ date: -1 }).toArray();
       res.send(result)
     })
+
     // -------------get one for details page------------------
-    app.get('/queries/:id', async (req, res) => {
+  //  ------------------------------
+    app.get('/query/:id', async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
 
-      const options = {
-        projection: {ProductName: 1,_id: 1},
-      };
-      const result = await queryCollection.findOne(query,options);
+      // const options = {
+      //   projection: {ProductName: 1,_id: 1},
+      // };
+      const result = await queryCollection.findOne(query);
       res.send(result);
     })
 
     
     
     //---------------- only for home page----------------
+    // -----------------------------
     app.get('/queries', async (req, res) => {
-      const result = await queryCollection.find().sort({ date: -1 }).skip(0).limit(6).toArray()
+      const result = await queryCollection.find().sort({ date: -1 }).skip(0).limit(8).toArray()
       res.send(result)
     })
 
     
     
     // -------------get all query added by specific user-------------
-    app.get('/query/:email', async (req, res) => {
+    app.get('/queries/:email', async (req, res) => {
       const email = req.params.email
       const query = { email: email }
       const result = await queryCollection.find(query).sort({ date: -1 }).toArray()
@@ -117,13 +148,7 @@ async function run() {
     })
 
     // ------------get data for update---------------
-  app.get('/query/:id', async (req, res) => {
-    const id = req.params.id;
-    console.log(id)
-    const query = { _id: new ObjectId(id) }
-    const result = await queryCollection.findOne(query);
-    res.send(result);
-  })
+  
   
     
 
