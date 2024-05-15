@@ -60,9 +60,9 @@ app.get('/recommend/:userEmail', async (req, res) => {
   res.send(result)
 })
 // ----------------delete recommendation----------------------
-app.delete('/recommend/:id', async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) }
+app.delete('/recommend/:userEmail', async (req, res) => {
+  const userEmail = req.params.userEmail
+  const query = { userEmail : userEmail }
   const result = await recommendCollection.deleteOne(query);
   res.send(result);
 })
